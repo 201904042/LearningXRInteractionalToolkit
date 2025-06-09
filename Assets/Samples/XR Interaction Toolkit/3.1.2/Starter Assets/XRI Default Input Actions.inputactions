@@ -454,9 +454,36 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "ToggleAimLine",
+                    "name": "PressPrimaryButton",
+                    "type": "Button",
+                    "id": "c993a18c-d4c9-43e2-8545-1c26a786ba32",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PressSecondaryButton",
                     "type": "Button",
                     "id": "3a3f819d-9446-4809-b980-21a47e2a8b3c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PressGripButton",
+                    "type": "Button",
+                    "id": "c2c8465d-2a38-4420-ade4-f2d4daa202f2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PressTriggerButton",
+                    "type": "Button",
+                    "id": "acdbcfbf-acce-4788-9789-6d53b41f2216",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -878,7 +905,40 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "ToggleAimLine",
+                    "action": "PressSecondaryButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5cae4f2f-c028-4fed-89a4-d49cd0e15e3f",
+                    "path": "<XRController>{LeftHand}/{PrimaryButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PressPrimaryButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bf4a724f-619d-4c88-82d9-b6ae0d61aa21",
+                    "path": "<XRController>{LeftHand}/{GripButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PressGripButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "af16d4b5-eaba-434c-be4d-50ab57ff8ced",
+                    "path": "<XRController>{LeftHand}/{TriggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PressTriggerButton",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -32,7 +32,7 @@ public class ShootLine_Controller : MonoBehaviour
     private void OnEnable()
     {
         // 액션 찾기
-        toggleAimAction = inputActions.FindAction("XRI Left/ToggleAimLine");
+        toggleAimAction = inputActions.FindAction("XRI Left/PressSecondaryButton");
         if (toggleAimAction != null)
         {
             toggleAimAction.performed += OnYButtonPressed;
