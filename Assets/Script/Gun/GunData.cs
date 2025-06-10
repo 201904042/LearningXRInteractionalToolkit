@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Gun/GunData")]
+[CreateAssetMenu(menuName = "ControllerGun/GunData")]
 public class GunData : ScriptableObject
 {
     public string gunId;
