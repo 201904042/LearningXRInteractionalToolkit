@@ -1,23 +1,36 @@
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 public class Magazine : MonoBehaviour
 {
-    [SerializeField] private int id;         //종류별 아이디
-    [SerializeField] private int bullets;    //장전된 총알의 수
+    private XRGrabInteractable grabInteractable;
+    private Rigidbody rb;
+    private Collider[] childColliders;
 
+    [SerializeField] private int gunId;
+    [SerializeField] private int bullets;
     public bool autoInit = false;
 
-    public void Awake()
+    private void Awake()
     {
-        id = 0;
-        bullets = 10;
-    }
+        grabInteractable = GetComponent<XRGrabInteractable>();
+        rb = GetComponent<Rigidbody>();
+        childColliders = GetComponentsInChildren<Collider>();
 
+        if (autoInit)
+            Init(0, 10);
+    }
 
     public void Init(int id, int num)
     {
-        this.id = id;   
+        this.gunId = id;
         bullets = num;
+        SetGrabbable(true);
+    }
+
+    public void SetGrabbable(bool tf)
+    {
+        grabInteractable.enabled = tf;
     }
 
     public void SetBullets(int num)
@@ -27,10 +40,43 @@ public class Magazine : MonoBehaviour
 
     public int GetId()
     {
-        return id;
+        return gunId;
     }
+
     public int GetBullets()
     {
         return bullets;
+    }
+
+    public void UseBullet()
+    {
+        bullets--;
+    }
+
+    public void LoadBullet()
+    {
+        bullets++;
+    }
+
+    public bool IsEmpty()
+    {
+        return bullets == 0;
+    }
+
+    public void SetPhysicsEnabled(bool enabled)
+    {
+        if (rb != null)
+        {
+            rb.isKinematic = !enabled;
+            rb.useGravity = enabled;
+        }
+
+        if (childColliders != null)
+        {
+            foreach (var col in childColliders)
+            {
+                col.enabled = enabled;
+            }
+        }
     }
 }

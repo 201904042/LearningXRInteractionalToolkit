@@ -2,14 +2,16 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    public const float bulletForce = 1000f;
+
     [Header("총알 속성")]
-    public float damage;
-    public float maxLifeTime = 3f; // 비충돌 시 자동 제거 시간
     public GameObject modelObject; // 총알 모델 (Mesh)
     public GameObject trailObject; // TrailRenderer 포함 오브젝트
-
     private Rigidbody rb;
     private TrailRenderer trail;
+
+    public float damage;
+    public float maxLifeTime = 3f; // 비충돌 시 자동 제거 시간
     private bool hasHit = false;
     private float destroyDelay = 0.5f; // TrailRenderer 시간보다 약간 여유 있게
 
@@ -43,7 +45,7 @@ public class Bullet : MonoBehaviour
         trail.receiveShadows = false;
     }
 
-    public void Init(float dmg, float force, Vector3 direction)
+    public void Init(float dmg, Vector3 direction)
     {
         damage = dmg;
         hasHit = false;
@@ -56,24 +58,15 @@ public class Bullet : MonoBehaviour
         rb.isKinematic = false;
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        rb.AddForce(direction * force, ForceMode.Impulse);
+        rb.AddForce(direction * bulletForce, ForceMode.Impulse);
 
         CancelInvoke();
         Invoke(nameof(ForceDestroy), maxLifeTime);
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (hasHit) return;
-        hasHit = true;
-
-        modelObject.SetActive(false);
-        rb.linearVelocity = Vector3.zero;
-        rb.isKinematic = true;
-
-        Invoke(nameof(DestroyBullet), trail.time + destroyDelay);
-    }
-
+    /// <summary>
+    /// 파괴판정
+    /// </summary>
     private void ForceDestroy()
     {
         if (!hasHit)
@@ -87,8 +80,23 @@ public class Bullet : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 총알 오브젝트 제거
+    /// </summary>
     private void DestroyBullet()
     {
         Destroy(gameObject); // 풀링 시엔 SetActive(false) 대체 가능
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (hasHit) return;
+        hasHit = true;
+
+        modelObject.SetActive(false);
+        rb.linearVelocity = Vector3.zero;
+        rb.isKinematic = true;
+
+        Invoke(nameof(DestroyBullet), trail.time + destroyDelay);
     }
 }
