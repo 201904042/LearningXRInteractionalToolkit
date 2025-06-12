@@ -18,9 +18,24 @@ public class XRGunMagazineSocket : XRSocketInteractor
         if (!base.CanSelect(interactable))
             return false;
 
-        // 이미 총에 탄창이 끼워져 있으면 선택 불가
-        if (gun != null && gun.HasMagazineAttached())
+        GameObject targetObj = (interactable as MonoBehaviour)?.gameObject;
+        Magazine targetMag = targetObj?.GetComponent<Magazine>();
+
+        //총이 누락되거나 Interactable이  탄창이 아님
+        if (gun == null || targetMag == null)
+        {
+            Debug.Log("총이나 탄창이 없음");
             return false;
+        }
+            
+
+        // 총과 탄창이 일치하지 않거나 이미 총에 탄창이 끼워져 있으면 선택 불가
+        if (gun.gunData.GetId() != targetMag.GetId() || gun.HasMagazineAttached())
+        {
+            Debug.Log("아이디 불일치 혹은 이미 장전됨");
+            return false;
+        }
+            
 
         return true;
     }

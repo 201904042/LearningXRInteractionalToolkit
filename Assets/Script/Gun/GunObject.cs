@@ -50,10 +50,9 @@ public class GunObject : MonoBehaviour
         Magazine mag = magObj.GetComponent<Magazine>();
         XRGrabInteractable magGrab = magObj.GetComponent<XRGrabInteractable>();
 
-        mag.SetPhysicsEnabled(false);
         magazineSocket.startingSelectedInteractable = magGrab;
 
-        InsertMagazine(mag);
+        InsertMagazine();
         PullSlider();
     }
 
@@ -97,10 +96,8 @@ public class GunObject : MonoBehaviour
     }
 
     [ContextMenu("insert")]
-    public void InsertMagazine(Magazine mag)
+    public void InsertMagazine()
     {
-        if (mag == null) return;
-
         // 이미 탄창이 끼워져 있으면 새 탄창은 무시
         if (usingMag != null)
         {
@@ -108,8 +105,23 @@ public class GunObject : MonoBehaviour
             return;
         }
 
-        usingMag = mag.gameObject;
-        mag.transform.SetParent(magazineSocket.transform);
+        var selected = magazineSocket.GetOldestInteractableSelected();
+        if (selected == null)
+        {
+            Debug.Log("소켓에 아무것도 끼워지지 않았습니다.");
+            return;
+        }
+
+        usingMag = selected.transform.gameObject;
+        if (usingMag == null)
+        {
+            Debug.LogWarning("끼워진 오브젝트에 Magazine 컴포넌트가 없습니다.");
+            return;
+        }
+
+        // 물리 비활성화 및 부모 설정
+        usingMag.GetComponent<Magazine>().SetPhysicsEnabled(false);
+        usingMag.transform.SetParent(magazineSocket.transform);
     }
 
     /// <summary>

@@ -16,7 +16,7 @@ public class Magazine : MonoBehaviour
         grabInteractable = GetComponent<XRGrabInteractable>();
         rb = GetComponent<Rigidbody>();
         childColliders = GetComponentsInChildren<Collider>();
-
+        Debug.Log(childColliders.Length);
         if (autoInit)
             Init(0, 10);
     }
@@ -78,5 +78,7 @@ public class Magazine : MonoBehaviour
                 col.enabled = enabled;
             }
         }
+
+        Debug.Log($"physics : {enabled}");
     }
 }
