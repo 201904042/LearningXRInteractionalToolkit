@@ -1,10 +1,10 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class XRGunMagazineSocket : XRSocketInteractor
 {
-    private GunObject gun; // ÂüÁ¶ÇÒ ÃÑ °´Ã¼
+    private GunObject gun;
 
     protected override void Awake()
     {
@@ -12,31 +12,32 @@ public class XRGunMagazineSocket : XRSocketInteractor
         gun = GetComponentInParent<GunObject>();
     }
 
-    public override bool CanSelect(IXRSelectInteractable interactable)
+    private bool IsValidMagazine(IXRInteractable interactable)
     {
-        // ±âº» Á¶°ÇÀÌ ¸Â´ÂÁö Ã¼Å©
-        if (!base.CanSelect(interactable))
-            return false;
-
         GameObject targetObj = (interactable as MonoBehaviour)?.gameObject;
-        Magazine targetMag = targetObj?.GetComponent<Magazine>();
 
-        //ÃÑÀÌ ´©¶ôµÇ°Å³ª InteractableÀÌ  ÅºÃ¢ÀÌ ¾Æ´Ô
-        if (gun == null || targetMag == null)
-        {
-            Debug.Log("ÃÑÀÌ³ª ÅºÃ¢ÀÌ ¾øÀ½");
-            return false;
-        }
-            
+        // ì´ì„ ì¡ê³  ìˆëŠ”ì§€ ì²´í¬
+        Magazine mag = targetObj.GetComponent<Magazine>();
 
-        // ÃÑ°ú ÅºÃ¢ÀÌ ÀÏÄ¡ÇÏÁö ¾Ê°Å³ª ÀÌ¹Ì ÃÑ¿¡ ÅºÃ¢ÀÌ ³¢¿öÁ® ÀÖÀ¸¸é ¼±ÅÃ ºÒ°¡
-        if (gun.gunData.GetId() != targetMag.GetId() || gun.HasMagazineAttached())
-        {
-            Debug.Log("¾ÆÀÌµğ ºÒÀÏÄ¡ È¤Àº ÀÌ¹Ì ÀåÀüµÊ");
+        XRGrabInteractable gunGrab = gun.GetComponent<XRGrabInteractable>();
+        if (mag == null || gunGrab == null) 
             return false;
-        }
-            
+        // íƒ„ì°½ IDì™€ ì´ IDê°€ ì¼ì¹˜í•˜ëŠ”ì§€ + ì•„ì§ ì¥ì°©ë˜ì§€ ì•Šì•˜ëŠ”ì§€
+        if (!mag.IsOnGrab || gun.HasMagazineAttached() || gun.gunData.GetId() != mag.GetId()) 
+            return false;
 
         return true;
     }
+
+    public override bool CanHover(IXRHoverInteractable interactable)
+    {
+        return base.CanHover(interactable) && IsValidMagazine(interactable);
+
+    }
+
+    public override bool CanSelect(IXRSelectInteractable interactable)
+    {
+        return base.CanSelect(interactable) && IsValidMagazine(interactable);
+    }
+
 }

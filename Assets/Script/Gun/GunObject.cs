@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
@@ -21,10 +22,11 @@ public class GunObject : MonoBehaviour
 
     [Header("탄알집")]
     public Transform magAttachPoint;
-    private GameObject usingMag;
+    [SerializeField] private GameObject usingMag;
     [SerializeField] private GunState state;
 
     [Header("약실 상태")]
+    //총을 발사하는 최종판단 -> 탄창이 빠져도 약실에 총알이 있다면 발사가 가능함
     [SerializeField] private bool isBulletChambered = false;
 
     [Header("디버그 설정")]
@@ -50,7 +52,10 @@ public class GunObject : MonoBehaviour
         Magazine mag = magObj.GetComponent<Magazine>();
         XRGrabInteractable magGrab = magObj.GetComponent<XRGrabInteractable>();
 
-        magazineSocket.startingSelectedInteractable = magGrab;
+        magGrab.interactionManager.SelectEnter(
+            (IXRSelectInteractor)magazineSocket,
+            (IXRSelectInteractable)magGrab
+        );
 
         InsertMagazine();
         PullSlider();
@@ -90,7 +95,7 @@ public class GunObject : MonoBehaviour
     {
         if (usingMag == null) return;
 
-        
+        usingMag.GetComponent<Magazine>().SetPhysicsEnabled(true);
         usingMag.transform.SetParent(null);
         usingMag = null;
     }
@@ -108,18 +113,18 @@ public class GunObject : MonoBehaviour
         var selected = magazineSocket.GetOldestInteractableSelected();
         if (selected == null)
         {
-            Debug.Log("소켓에 아무것도 끼워지지 않았습니다.");
+            Debug.Log("소켓에 착용된 탄창을 찾지 못함");
             return;
         }
 
         usingMag = selected.transform.gameObject;
         if (usingMag == null)
         {
-            Debug.LogWarning("끼워진 오브젝트에 Magazine 컴포넌트가 없습니다.");
+            Debug.Log("매거진을 찾지못함");
             return;
         }
 
-        // 물리 비활성화 및 부모 설정
+        Debug.Log("Inserted");
         usingMag.GetComponent<Magazine>().SetPhysicsEnabled(false);
         usingMag.transform.SetParent(magazineSocket.transform);
     }

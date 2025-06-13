@@ -1,67 +1,78 @@
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 public class Magazine : MonoBehaviour
 {
-    private XRGrabInteractable grabInteractable;
-    private Rigidbody rb;
-    private Collider[] childColliders;
+    [SerializeField] private XRGrabInteractable grabInteractable;
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private GameObject cols;
 
     [SerializeField] private int gunId;
     [SerializeField] private int bullets;
-    public bool autoInit = false;
+    [SerializeField] private bool autoInit = false;
+    [SerializeField] private bool isOnGrab = false;
+    [SerializeField] private Coroutine release;
 
     private void Awake()
     {
         grabInteractable = GetComponent<XRGrabInteractable>();
         rb = GetComponent<Rigidbody>();
-        childColliders = GetComponentsInChildren<Collider>();
-        Debug.Log(childColliders.Length);
+
         if (autoInit)
             Init(0, 10);
     }
 
-    public void Init(int id, int num)
+    public void OnGrab()
     {
-        this.gunId = id;
-        bullets = num;
+        if(release != null)
+            StopCoroutine(release);
+
+        isOnGrab = true;
+    }
+
+    public void ReleaseGrab()
+    {
+        StartCoroutine(ReleaseOnSecond());
+    }
+
+    private IEnumerator ReleaseOnSecond()
+    {
+        yield return new WaitForSeconds(0.5f);
+        isOnGrab = true;
+    }
+
+    public void Init(int id, int initialBullets)
+    {
+        gunId = id;
+        bullets = initialBullets;
         SetGrabbable(true);
     }
 
-    public void SetGrabbable(bool tf)
+    public void SetGrabbable(bool enabled)
     {
-        grabInteractable.enabled = tf;
+        if (grabInteractable != null)
+            grabInteractable.enabled = enabled;
     }
 
-    public void SetBullets(int num)
-    {
-        bullets = num;
-    }
+    public void SetBullets(int count) => bullets = count;
 
-    public int GetId()
-    {
-        return gunId;
-    }
+    public int GetId() => gunId;
 
-    public int GetBullets()
-    {
-        return bullets;
-    }
+    public int GetBullets() => bullets;
 
     public void UseBullet()
     {
-        bullets--;
+        if (bullets > 0)
+            bullets--;
     }
 
-    public void LoadBullet()
-    {
-        bullets++;
-    }
+    public void LoadBullet() => bullets++;
 
-    public bool IsEmpty()
-    {
-        return bullets == 0;
-    }
+    public bool IsEmpty() => bullets <= 0;
+    public bool IsOnGrab => isOnGrab;
+
 
     public void SetPhysicsEnabled(bool enabled)
     {
@@ -71,14 +82,13 @@ public class Magazine : MonoBehaviour
             rb.useGravity = enabled;
         }
 
-        if (childColliders != null)
+
+        if (cols != null)
         {
-            foreach (var col in childColliders)
-            {
-                col.enabled = enabled;
-            }
+            cols.SetActive(enabled);
         }
 
         Debug.Log($"physics : {enabled}");
     }
+
 }
