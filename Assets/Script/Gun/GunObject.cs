@@ -25,16 +25,8 @@ public class GunObject : MonoBehaviour
     [SerializeField] private GameObject usingMag;
     [SerializeField] private GunState state;
 
-    [Header("약실 상태")]
-    //총을 발사하는 최종판단 -> 탄창이 빠져도 약실에 총알이 있다면 발사가 가능함
-    [SerializeField] private bool isBulletChambered = false;
-
     [Header("디버그 설정")]
     public bool StartWithLoaded = false;
-
-    private void Awake()
-    {
-    }
 
     private void Start()
     {
@@ -58,28 +50,27 @@ public class GunObject : MonoBehaviour
         );
 
         InsertMagazine();
-        PullSlider();
     }
 
     public void ActivateGun() { }
-
     public void DeactivateGun() { }
+
 
     [ContextMenu("shoot")]
     public void Shoot()
     {
-        if (state != GunState.Ready || !isBulletChambered)
+        if (state != GunState.Ready || !HasAmmo())
         {
             return;
         }
 
-        //총알 생성
+        // 총알 생성
         GameObject bullet = Instantiate(gunData.bulletPrefab, firePos.position, firePos.rotation);
         Bullet bulletScript = bullet.GetComponent<Bullet>();
         bulletScript.Init(bulletDamage, firePos.forward);
         StartCoroutine(DelayNextShot());
 
-        //발사시 자동 슬라이더 당겨짐
+        // 슬라이더는 발사 시에도 자동으로 1발 소비
         PullSlider();
     }
 
@@ -93,6 +84,7 @@ public class GunObject : MonoBehaviour
     [ContextMenu("eject")]
     public void EjectMagazine()
     {
+        Debug.Log("eject");
         if (usingMag == null) return;
 
         usingMag.GetComponent<Magazine>().SetPhysicsEnabled(true);
@@ -103,7 +95,7 @@ public class GunObject : MonoBehaviour
     [ContextMenu("insert")]
     public void InsertMagazine()
     {
-        // 이미 탄창이 끼워져 있으면 새 탄창은 무시
+        Debug.Log("insert");
         if (usingMag != null)
         {
             Debug.Log("이미 탄창이 끼워져 있습니다.");
@@ -124,33 +116,30 @@ public class GunObject : MonoBehaviour
             return;
         }
 
+        //usingMag.GetComponent<Magazine>().SetPhysicsEnabled(false);
+        //usingMag.transform.SetParent(magazineSocket.transform);
         Debug.Log("Inserted");
-        usingMag.GetComponent<Magazine>().SetPhysicsEnabled(false);
-        usingMag.transform.SetParent(magazineSocket.transform);
+       
     }
 
     /// <summary>
-    /// 슬라이더를 당겼을 때 호출 (직접 입력으로도 가능)
+    /// 슬라이더를 당기면 탄창에서 1발을 소비
     /// </summary>
     [ContextMenu("PullSlider")]
     public void PullSlider()
     {
-        if (usingMag == null)
-        {
-            isBulletChambered = false; 
-            return;
-        }
+        Debug.Log("PullSlider");
+        if (usingMag == null) return;
 
         Magazine mag = usingMag.GetComponent<Magazine>();
         if (mag.GetBullets() > 0)
         {
             mag.UseBullet(); // 탄창에서 한 발 꺼냄
-            isBulletChambered = true;
             state = GunState.Ready;
         }
         else
         {
-            isBulletChambered = false;
+            Debug.Log("탄약 없음");
         }
     }
 
@@ -159,5 +148,8 @@ public class GunObject : MonoBehaviour
         return usingMag != null;
     }
 
-
+    public bool HasAmmo()
+    {
+        return usingMag != null && usingMag.GetComponent<Magazine>().GetBullets() > 0;
+    }
 }

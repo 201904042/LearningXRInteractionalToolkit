@@ -29,11 +29,6 @@ public class XRGunMagazineSocket : XRSocketInteractor
         return true;
     }
 
-    public override bool CanHover(IXRHoverInteractable interactable)
-    {
-        return base.CanHover(interactable) && IsValidMagazine(interactable);
-
-    }
 
     public override bool CanSelect(IXRSelectInteractable interactable)
     {
