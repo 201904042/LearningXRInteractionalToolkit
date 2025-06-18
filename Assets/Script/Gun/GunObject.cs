@@ -1,16 +1,17 @@
 using System.Collections;
-using System.Net.Sockets;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using static Enums;
 
 public class GunObject : MonoBehaviour
 {
+    [Header("Interaction")]
     public XRGrabInteractable grabInteractable;
-    public XRSocketInteractor magazineSocket;
+    public XRGunMagazineSocket magazineSocket;
 
-    [Header("GunData")]
+    [Header("Gun Data")]
     public GunData gunData;
 
     [Header("총기 설정")]
@@ -22,8 +23,9 @@ public class GunObject : MonoBehaviour
 
     [Header("탄알집")]
     public Transform magAttachPoint;
-    [SerializeField] private GameObject usingMag;
+    [SerializeField] private Magazine usingMag;
     [SerializeField] private GunState state;
+    [SerializeField] private bool hasSlide = true;
 
     [Header("디버그 설정")]
     public bool StartWithLoaded = false;
@@ -31,9 +33,13 @@ public class GunObject : MonoBehaviour
     private void Start()
     {
         if (StartWithLoaded)
-        {
             StartCoroutine(DelayedAutoLoad());
-        }
+
+        if(magazineSocket == null)
+            magazineSocket = GetComponentInChildren<XRGunMagazineSocket>();
+
+        magazineSocket.selectEntered.AddListener(InsertMagazine);
+        magazineSocket.selectExited.AddListener(EjectMagazine);
     }
 
     private IEnumerator DelayedAutoLoad()
@@ -41,37 +47,32 @@ public class GunObject : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
 
         GameObject magObj = Instantiate(gunData.magPrefab, magAttachPoint.position, magAttachPoint.rotation);
-        Magazine mag = magObj.GetComponent<Magazine>();
-        XRGrabInteractable magGrab = magObj.GetComponent<XRGrabInteractable>();
+        if (!magObj.TryGetComponent(out Magazine mag) || !magObj.TryGetComponent(out XRGrabInteractable magGrab))
+        {
+            Debug.LogWarning("탄창 프리팹에 Magazine 또는 XRGrabInteractable이 없습니다.");
+            yield break;
+        }
 
-        magGrab.interactionManager.SelectEnter(
-            (IXRSelectInteractor)magazineSocket,
-            (IXRSelectInteractable)magGrab
-        );
-
-        InsertMagazine();
+        // XR 상호작용으로 장전 시도
+        //magazineSocket.interactionManager.SelectEnter(magazineSocket, magGrab);
+        //XRGrabInteractable과 XRGunMagazineSocket을 각각 IXRSelectInteractable, IXRSelectInteractor로 전환이 필요함
+        //명시적 캐스팅 사용
+        magazineSocket.interactionManager.SelectEnter((IXRSelectInteractor)magazineSocket,(IXRSelectInteractable)magGrab);
     }
 
-    public void ActivateGun() { }
-    public void DeactivateGun() { }
 
-
-    [ContextMenu("shoot")]
+    [ContextMenu("Shoot")]
     public void Shoot()
     {
         if (state != GunState.Ready || !HasAmmo())
-        {
             return;
-        }
 
-        // 총알 생성
         GameObject bullet = Instantiate(gunData.bulletPrefab, firePos.position, firePos.rotation);
-        Bullet bulletScript = bullet.GetComponent<Bullet>();
-        bulletScript.Init(bulletDamage, firePos.forward);
-        StartCoroutine(DelayNextShot());
+        if (bullet.TryGetComponent(out Bullet bulletScript))
+            bulletScript.Init(bulletDamage, firePos.forward);
 
-        // 슬라이더는 발사 시에도 자동으로 1발 소비
-        PullSlider();
+        StartCoroutine(DelayNextShot());
+        PullSlider(); // 자동으로 1발 소비
     }
 
     private IEnumerator DelayNextShot()
@@ -81,61 +82,42 @@ public class GunObject : MonoBehaviour
         state = GunState.Ready;
     }
 
-    [ContextMenu("eject")]
-    public void EjectMagazine()
+    [ContextMenu("Eject Magazine")]
+    public void EjectMagazine(SelectExitEventArgs args)
     {
-        Debug.Log("eject");
-        if (usingMag == null) return;
-
-        usingMag.GetComponent<Magazine>().SetPhysicsEnabled(true);
-        usingMag.transform.SetParent(null);
+        
+        Debug.Log("탄창 분리됨");
+        return;
         usingMag = null;
     }
 
-    [ContextMenu("insert")]
-    public void InsertMagazine()
+
+    [ContextMenu("Insert Magazine")]
+    public void InsertMagazine(SelectEnterEventArgs args)
     {
-        Debug.Log("insert");
-        if (usingMag != null)
-        {
-            Debug.Log("이미 탄창이 끼워져 있습니다.");
-            return;
-        }
-
-        var selected = magazineSocket.GetOldestInteractableSelected();
-        if (selected == null)
-        {
-            Debug.Log("소켓에 착용된 탄창을 찾지 못함");
-            return;
-        }
-
-        usingMag = selected.transform.gameObject;
-        if (usingMag == null)
-        {
-            Debug.Log("매거진을 찾지못함");
-            return;
-        }
-
-        //usingMag.GetComponent<Magazine>().SetPhysicsEnabled(false);
-        //usingMag.transform.SetParent(magazineSocket.transform);
-        Debug.Log("Inserted");
-       
+        Debug.Log("탄창 장착됨");
+        
+        usingMag = args.interactableObject.transform.GetComponent<Magazine>();
+        return;
+        hasSlide = false;
     }
 
-    /// <summary>
-    /// 슬라이더를 당기면 탄창에서 1발을 소비
-    /// </summary>
-    [ContextMenu("PullSlider")]
+    [ContextMenu("Pull Slider")]
     public void PullSlider()
     {
-        Debug.Log("PullSlider");
-        if (usingMag == null) return;
 
-        Magazine mag = usingMag.GetComponent<Magazine>();
-        if (mag.GetBullets() > 0)
+        if (usingMag == null)
         {
-            mag.UseBullet(); // 탄창에서 한 발 꺼냄
+            Debug.LogWarning("탄창이 없습니다.");
+            return;
+        }
+
+        if (usingMag.BulletCount > 0)
+        {
+            hasSlide = true;
+            usingMag.UseBullet();
             state = GunState.Ready;
+            Debug.Log("슬라이더 당김 - 발사 준비됨");
         }
         else
         {
@@ -143,13 +125,8 @@ public class GunObject : MonoBehaviour
         }
     }
 
-    public bool HasMagazineAttached()
-    {
-        return usingMag != null;
-    }
-
-    public bool HasAmmo()
-    {
-        return usingMag != null && usingMag.GetComponent<Magazine>().GetBullets() > 0;
-    }
+    public void ActivateGun() => state = GunState.Ready;
+    public void DeactivateGun() => state = GunState.UnGrab;
+    public bool HasMagazineAttached() => usingMag != null;
+    public bool HasAmmo() => usingMag != null && usingMag.BulletCount > 0;
 }
