@@ -15,17 +15,15 @@ public class XRGunMagazineSocket : XRSocketInteractor
 
     private Magazine GetValidMagazine(IXRInteractable interactable)
     {
-        if (interactable is not MonoBehaviour mb) return null;
+        if (interactable is not MonoBehaviour mb) 
+            return null;
         var magazine = mb.GetComponent<Magazine>();
         var gunGrab = m_gun?.GetComponent<XRGrabInteractable>();
 
         if (magazine == null || gunGrab == null)
             return null;
 
-        bool isValid =
-            magazine.IsOnGrab &&
-            !m_gun.HasMagazineAttached() &&
-            m_gun.gunData.GetId() == magazine.GunId;
+        bool isValid = m_gun.gunData.GetId() == magazine.GunId;
 
         return isValid ? magazine : null;
     }

@@ -15,7 +15,6 @@ public class Magazine : MonoBehaviour
     [SerializeField] private bool autoInit = false;
 
     private bool isOnGrab = false;
-    private Coroutine releaseCoroutine;
 
     public int GunId => gunId;
     public int BulletCount => bullets;
@@ -35,30 +34,6 @@ public class Magazine : MonoBehaviour
     {
         gunId = id;
         bullets = initialBullets;
-        EnableGrabbable(true);
-    }
-
-    public void OnGrab()
-    {
-        if (releaseCoroutine != null)
-            StopCoroutine(releaseCoroutine);
-
-        isOnGrab = true;
-    }
-
-    public void OnRelease()
-    {
-        if (releaseCoroutine != null)
-            StopCoroutine(releaseCoroutine);
-
-        releaseCoroutine = StartCoroutine(DelayedGrabReset());
-    }
-
-    private IEnumerator DelayedGrabReset()
-    {
-        yield return new WaitForSeconds(0.5f);
-        isOnGrab = false;
-        releaseCoroutine = null;
     }
 
     public void UseBullet()
@@ -77,25 +52,4 @@ public class Magazine : MonoBehaviour
         bullets = Mathf.Max(0, count);
     }
 
-    public void EnableGrabbable(bool enable)
-    {
-        if (grabInteractable != null)
-            grabInteractable.enabled = enable;
-    }
-
-    public void EnablePhysics(bool enable)
-    {
-        if (rb != null)
-        {
-            rb.isKinematic = !enable;
-            rb.useGravity = enable;
-        }
-
-        if (colliderRoot != null)
-        {
-            colliderRoot.SetActive(enable);
-        }
-
-        Debug.Log($"[Magazine] Physics Enabled: {enable}");
-    }
 }

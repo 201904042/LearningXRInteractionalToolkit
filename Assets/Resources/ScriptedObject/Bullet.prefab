@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6906240141595245656}
   m_Layer: 0
   m_Name: Bullet
-  m_TagString: Untagged
+  m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -56,7 +56,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 0.010931408, y: 0.012622502, z: 0.011250003}
-  m_Center: {x: 4.656613e-10, y: -2.3283064e-10, z: 0.0051249997}
+  m_Center: {x: 0, y: 0, z: 0.0051249773}
 --- !u!54 &3257399428583754700
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -96,10 +96,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bc2f1ad629c3c64aa273123c835fa73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 0
-  maxLifeTime: 3
   modelObject: {fileID: 7796482763919673445}
   trailObject: {fileID: 8205493583228001985}
+  damage: 0
+  maxLifeTime: 3
   trailTime: 0.4
   startWidth: 0.05
   endWidth: 0
@@ -161,7 +161,7 @@ Transform:
   m_GameObject: {fileID: 7796482763919673445}
   serializedVersion: 2
   m_LocalRotation: {x: -0.000000059604645, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1.332}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -25,17 +25,20 @@ public class GunObject : MonoBehaviour
     public Transform magAttachPoint;
     [SerializeField] private Magazine usingMag;
     [SerializeField] private GunState state;
-    [SerializeField] private bool hasSlide = true;
 
     [Header("디버그 설정")]
     public bool StartWithLoaded = false;
+    public bool DebugMod = false;
 
     private void Start()
     {
         if (StartWithLoaded)
             StartCoroutine(DelayedAutoLoad());
 
-        if(magazineSocket == null)
+        if (grabInteractable == null)
+            grabInteractable = GetComponent<XRGrabInteractable>();
+
+        if (magazineSocket == null)
             magazineSocket = GetComponentInChildren<XRGunMagazineSocket>();
 
         magazineSocket.selectEntered.AddListener(InsertMagazine);
@@ -53,18 +56,16 @@ public class GunObject : MonoBehaviour
             yield break;
         }
 
-        // XR 상호작용으로 장전 시도
-        //magazineSocket.interactionManager.SelectEnter(magazineSocket, magGrab);
-        //XRGrabInteractable과 XRGunMagazineSocket을 각각 IXRSelectInteractable, IXRSelectInteractor로 전환이 필요함
-        //명시적 캐스팅 사용
-        magazineSocket.interactionManager.SelectEnter((IXRSelectInteractor)magazineSocket,(IXRSelectInteractable)magGrab);
+        magazineSocket.interactionManager.SelectEnter(
+            (IXRSelectInteractor)magazineSocket,
+            (IXRSelectInteractable)magGrab
+        );
     }
-
 
     [ContextMenu("Shoot")]
     public void Shoot()
     {
-        if (state != GunState.Ready || !HasAmmo())
+        if (!DebugMod && (state != GunState.Ready || !HasAmmo()))
             return;
 
         GameObject bullet = Instantiate(gunData.bulletPrefab, firePos.position, firePos.rotation);
@@ -72,61 +73,78 @@ public class GunObject : MonoBehaviour
             bulletScript.Init(bulletDamage, firePos.forward);
 
         StartCoroutine(DelayNextShot());
-        PullSlider(); // 자동으로 1발 소비
+        PullSlider(); // 발사 후 슬라이더 재설정
     }
 
     private IEnumerator DelayNextShot()
     {
         state = GunState.Delay;
         yield return new WaitForSeconds(fireDelay);
-        state = GunState.Ready;
+        state = HasAmmo() ? GunState.Ready : GunState.NoAmmo;
     }
 
     [ContextMenu("Eject Magazine")]
     public void EjectMagazine(SelectExitEventArgs args)
     {
-        
         Debug.Log("탄창 분리됨");
-        return;
+        usingMag.transform.SetParent(null);
         usingMag = null;
+        state = GunState.NoMag;
     }
-
 
     [ContextMenu("Insert Magazine")]
     public void InsertMagazine(SelectEnterEventArgs args)
     {
         Debug.Log("탄창 장착됨");
-        
         usingMag = args.interactableObject.transform.GetComponent<Magazine>();
-        return;
-        hasSlide = false;
+        usingMag.transform.SetParent(magAttachPoint);
+        state = GunState.NoSlide;
     }
 
     [ContextMenu("Pull Slider")]
     public void PullSlider()
     {
-
         if (usingMag == null)
         {
             Debug.LogWarning("탄창이 없습니다.");
+            state = GunState.NoMag;
             return;
         }
 
         if (usingMag.BulletCount > 0)
         {
-            hasSlide = true;
             usingMag.UseBullet();
             state = GunState.Ready;
-            Debug.Log("슬라이더 당김 - 발사 준비됨");
         }
         else
         {
-            Debug.Log("탄약 없음");
+            state = GunState.NoAmmo;
         }
     }
 
-    public void ActivateGun() => state = GunState.Ready;
+    public void ActivateGun()
+    {
+        if(state== GunState.Ready || state == GunState.Delay)
+        {
+            state = GunState.Ready;
+            return;
+        }
+
+        if (usingMag == null)
+        {
+            state = GunState.NoMag;
+            return;
+        }
+
+        if (usingMag.BulletCount == 0)
+            state = GunState.NoAmmo;
+        else
+            state = GunState.NoSlide;
+    }
+
     public void DeactivateGun() => state = GunState.UnGrab;
+
     public bool HasMagazineAttached() => usingMag != null;
+
     public bool HasAmmo() => usingMag != null && usingMag.BulletCount > 0;
 }
