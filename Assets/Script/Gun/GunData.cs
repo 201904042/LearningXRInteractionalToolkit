@@ -10,6 +10,7 @@ public class GunData : ScriptableObject
     [SerializeField] private float gunDamage;            //데미지
     [SerializeField] private float gunFireRate;          //발사속도
     [SerializeField] private int gunBulletCount;         //장전개수
+    [SerializeField] private float bulletDistance;         //총알의 최대거리
     [SerializeField] private Enums.GunType gunType;      //총의 타입(임시) 필요한가?
 
     [Header("오브젝트")]
@@ -37,6 +38,10 @@ public class GunData : ScriptableObject
         return gunFireRate;
     }
     public int GetBulletCount()
+    {
+        return gunBulletCount;
+    }
+    public float GetBulletDistance()
     {
         return gunBulletCount;
     }

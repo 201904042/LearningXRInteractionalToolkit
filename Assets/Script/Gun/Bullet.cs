@@ -1,19 +1,10 @@
 using UnityEngine;
+using System.Collections;
 
 public class Bullet : MonoBehaviour
 {
-    public const float bulletForce = 1000f;
-
     [Header("총알 속성")]
-    public GameObject modelObject; // 총알 모델 (Mesh)
-    public GameObject trailObject; // TrailRenderer 포함 오브젝트
-    private Rigidbody rb;
-    private TrailRenderer trail;
-
-    public float damage;
-    public float maxLifeTime = 3f; // 비충돌 시 자동 제거 시간
-    private bool hasHit = false;
-    private float destroyDelay = 0.5f; // TrailRenderer 시간보다 약간 여유 있게
+    public float maxLifeTime = 3f;
 
     [Header("Trail 설정")]
     public float trailTime = 0.4f;
@@ -22,10 +13,11 @@ public class Bullet : MonoBehaviour
     public float minVertexDistance = 0.05f;
     public Gradient trailColor;
 
+    private TrailRenderer trail;
+
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        trail = trailObject.GetComponent<TrailRenderer>();
+        trail = GetComponent<TrailRenderer>();
         SetupTrailRenderer();
     }
 
@@ -45,58 +37,41 @@ public class Bullet : MonoBehaviour
         trail.receiveShadows = false;
     }
 
-    public void Init(float dmg, Vector3 direction)
+    public void InitVisual(Vector3 start, Vector3 end)
     {
-        damage = dmg;
-        hasHit = false;
-
-        modelObject.SetActive(true);
         trailObject.SetActive(true);
         trail.Clear();
-        SetupTrailRenderer(); // 재사용 시 매번 초기화
+        SetupTrailRenderer();
 
-        rb.isKinematic = false;
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.AddForce(direction * bulletForce, ForceMode.Impulse);
-
-        CancelInvoke();
-        Invoke(nameof(ForceDestroy), maxLifeTime);
+        transform.position = start;
+        StartCoroutine(MoveToTarget(end));
     }
 
-    /// <summary>
-    /// 파괴판정
-    /// </summary>
+    private IEnumerator MoveToTarget(Vector3 end)
+    {
+        float duration = trailTime; // 비주얼 이동 시간
+        float time = 0f;
+
+        Vector3 start = transform.position;
+
+        while (time < duration)
+        {
+            transform.position = Vector3.Lerp(start, end, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = end;
+        ForceDestroy();
+    }
+
     private void ForceDestroy()
     {
-        if (!hasHit)
-        {
-            hasHit = true;
-            modelObject.SetActive(false);
-            rb.linearVelocity = Vector3.zero;
-            rb.isKinematic = true;
-
-            Invoke(nameof(DestroyBullet), trail.time + destroyDelay);
-        }
+        Invoke(nameof(DestroyBullet), trail.time + 0.5f);
     }
 
-    /// <summary>
-    /// 총알 오브젝트 제거
-    /// </summary>
     private void DestroyBullet()
     {
-        Destroy(gameObject); // 풀링 시엔 SetActive(false) 대체 가능
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (hasHit) return;
-        hasHit = true;
-
-        modelObject.SetActive(false);
-        rb.linearVelocity = Vector3.zero;
-        rb.isKinematic = true;
-
-        Invoke(nameof(DestroyBullet), trail.time + destroyDelay);
+        Destroy(gameObject); // 풀링 시에는 SetActive(false)
     }
 }

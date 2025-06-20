@@ -18,6 +18,7 @@ MonoBehaviour:
   gunDamage: 0
   gunFireRate: 0
   gunBulletCount: 0
+  bulletDistance: 100
   gunType: 0
   bulletPrefab: {fileID: 4767035383342868697, guid: 7912e3f12146533408f8f5ca9fe36324, type: 3}
   magPrefab: {fileID: 386395334729238439, guid: 4796963242313424dbd7341645394589, type: 3}

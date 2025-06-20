@@ -68,13 +68,52 @@ public class GunObject : MonoBehaviour
         if (!DebugMod && (state != GunState.Ready || !HasAmmo()))
             return;
 
-        GameObject bullet = Instantiate(gunData.bulletPrefab, firePos.position, firePos.rotation);
-        if (bullet.TryGetComponent(out Bullet bulletScript))
-            bulletScript.Init(bulletDamage, firePos.forward);
+        Vector3 origin = firePos.position;
+        Vector3 direction = firePos.forward;
+
+        // Raycast로 충돌 체크
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, gunData.GetBulletDistance(), ~0))
+        {
+            Debug.Log($"Hit: {hit.collider.name}");
+
+            // 데미지 처리
+            if (hit.collider.TryGetComponent<IDamageable>(out var target))
+            {
+                target.ApplyDamage(bulletDamage);
+            }
+
+            // 총알 비주얼 처리
+            SpawnBulletVisual(origin, hit.point);
+        }
+        else
+        {
+            // 명중 대상 없으면 최대 거리로 비주얼 처리
+            SpawnBulletVisual(origin, origin + direction * gunData.GetBulletDistance());
+        }
 
         StartCoroutine(DelayNextShot());
-        PullSlider(); // 발사 후 슬라이더 재설정
+        PullSlider();
     }
+
+    // 비주얼용 총알 생성
+    private void SpawnBulletVisual(Vector3 start, Vector3 end)
+    {
+        Vector3 direction = end - start;
+
+        Quaternion rotation;
+        if (direction != Vector3.zero)
+            rotation = Quaternion.LookRotation(direction);
+        else
+            rotation = Quaternion.identity; // 기본 회전값
+
+        GameObject bullet = Instantiate(gunData.bulletPrefab, start, rotation);
+
+        if (bullet.TryGetComponent(out Bullet bulletScript))
+        {
+            bulletScript.InitVisual(start, end);
+        }
+    }
+
 
     private IEnumerator DelayNextShot()
     {
