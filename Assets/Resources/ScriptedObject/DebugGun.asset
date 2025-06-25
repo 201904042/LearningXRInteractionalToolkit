@@ -15,9 +15,9 @@ MonoBehaviour:
   gunId: 0
   gunName: Debug
   gunDescription: "\uC2E4\uD5D8\uC6A9 \uCD1D"
-  gunDamage: 0
-  gunFireRate: 0
-  gunBulletCount: 0
+  gunDamage: 1
+  gunFireRate: 0.5
+  gunBulletCount: 15
   bulletDistance: 100
   gunType: 0
   bulletPrefab: {fileID: 4767035383342868697, guid: 7912e3f12146533408f8f5ca9fe36324, type: 3}

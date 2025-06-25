@@ -17,7 +17,7 @@ public class Bullet : MonoBehaviour
 
     private void Awake()
     {
-        trail = GetComponent<TrailRenderer>();
+        trail = GetComponentInChildren<TrailRenderer>();
         SetupTrailRenderer();
     }
 
@@ -39,7 +39,7 @@ public class Bullet : MonoBehaviour
 
     public void InitVisual(Vector3 start, Vector3 end)
     {
-        trailObject.SetActive(true);
+        trail.gameObject.SetActive(true);
         trail.Clear();
         SetupTrailRenderer();
 

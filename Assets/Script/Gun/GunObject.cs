@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -16,6 +17,8 @@ public class GunObject : MonoBehaviour
 
     [Header("총기 설정")]
     public Transform firePos;
+    [SerializeField] GunUI gunUI;
+    [SerializeField] Animator animator;
 
     [Header("탄약 설정")]
     public float bulletDamage = 10f;
@@ -40,9 +43,30 @@ public class GunObject : MonoBehaviour
 
         if (magazineSocket == null)
             magazineSocket = GetComponentInChildren<XRGunMagazineSocket>();
-
         magazineSocket.selectEntered.AddListener(InsertMagazine);
         magazineSocket.selectExited.AddListener(EjectMagazine);
+
+        if(gunUI == null)
+            gunUI = GetComponentInChildren<GunUI>();
+        SetBulletUI();
+
+        if(animator == null)
+            animator = GetComponent<Animator>();
+    }
+
+    private void SetBulletUI()
+    {
+        if (DebugMod)
+        {
+            gunUI.SetText("~");
+            return;
+        }
+            
+
+        if (usingMag == null)
+            gunUI.SetText("-");
+        else
+            gunUI.SetText(usingMag.BulletCount);
     }
 
     private IEnumerator DelayedAutoLoad()
@@ -67,7 +91,7 @@ public class GunObject : MonoBehaviour
     {
         if (!DebugMod && (state != GunState.Ready || !HasAmmo()))
             return;
-
+        
         Vector3 origin = firePos.position;
         Vector3 direction = firePos.forward;
 
@@ -91,8 +115,23 @@ public class GunObject : MonoBehaviour
             SpawnBulletVisual(origin, origin + direction * gunData.GetBulletDistance());
         }
 
+
+        SetBulletUI();
+        PlaySlideAnimation();
         StartCoroutine(DelayNextShot());
         PullSlider();
+    }
+
+    private void PlaySlideAnimation()
+    {
+        if (animator != null)
+        {
+            animator.SetTrigger("Fire");
+        }
+        else
+        {
+            Debug.LogWarning("총 Animator가 할당되지 않았습니다.");
+        }
     }
 
     // 비주얼용 총알 생성
@@ -129,6 +168,7 @@ public class GunObject : MonoBehaviour
         usingMag.transform.SetParent(null);
         usingMag = null;
         state = GunState.NoMag;
+        SetBulletUI();
     }
 
     [ContextMenu("Insert Magazine")]
@@ -138,6 +178,7 @@ public class GunObject : MonoBehaviour
         usingMag = args.interactableObject.transform.GetComponent<Magazine>();
         usingMag.transform.SetParent(magAttachPoint);
         state = GunState.NoSlide;
+        SetBulletUI();
     }
 
     [ContextMenu("Pull Slider")]
