@@ -29,7 +29,7 @@ namespace Unity.VRTemplate
         {
             m_Toggle = gameObject.GetComponent<Toggle>();
 
-            //Add listener for when the state of the Toggle changes, to take action
+            //Add listener for when the m_state of the Toggle changes, to take action
             m_Toggle.onValueChanged.AddListener(ToggleValueChanged);
 
             if (m_Knob != null)

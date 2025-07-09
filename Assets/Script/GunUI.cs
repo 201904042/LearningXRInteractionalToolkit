@@ -27,7 +27,6 @@ public class GunUI : MonoBehaviour
         if (targetCamera == null)
             return;
 
-        // UI가 항상 카메라를 바라보도록 회전
         transform.rotation = Quaternion.LookRotation(transform.position - targetCamera.position);
     }
 
@@ -35,8 +34,11 @@ public class GunUI : MonoBehaviour
     {
         SetText($"{curBullet}");
     }
-    public void SetText(string s)
+
+    public void SetText(string t)
     {
-        text.text = s;
+        if (text == null)
+            return;
+        text.text = t;
     }
 }

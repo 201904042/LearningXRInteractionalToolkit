@@ -54,11 +54,11 @@ namespace Unity.VRTemplate
             {
                 m_VideoPlayer.playOnAwake = true; // Set play on awake for next enable.
                 m_VideoPlayer.Play(); // Play video to load first frame.
-                VideoStop(); // Stop the video to set correct state and pause frame.
+                VideoStop(); // Stop the video to set correct m_state and pause frame.
             }
             else
             {
-                VideoPlay(); // Play to ensure correct state.
+                VideoPlay(); // Play to ensure correct m_state.
             }
 
             if (m_ButtonPlayOrPause != null)
@@ -70,7 +70,7 @@ namespace Unity.VRTemplate
             if (m_VideoPlayer != null)
             {
                 m_VideoPlayer.frame = 0;
-                VideoPlay(); // Ensures correct UI state update if paused.
+                VideoPlay(); // Ensures correct UI m_state update if paused.
             }
 
             m_Slider.value = 0.0f;
