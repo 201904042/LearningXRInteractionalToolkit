@@ -18,7 +18,7 @@ public class GunUIManager : MonoBehaviour
         {
             case GunState.NoMag: ui.SetText("NoMag"); break;
             case GunState.NoSlide: ui.SetText("Unloaded"); break;
-            case GunState.NoAmmo: ui.SetText("reload"); break;
+            case GunState.NoAmmo: ui.SetText("NoAmmo"); break;
             case GunState.Ready:
             case GunState.Delay: ui.SetText(bulletCount); break;
             default: ui.SetText("~"); break;

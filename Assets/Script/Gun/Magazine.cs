@@ -6,8 +6,6 @@ public class Magazine : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private XRGrabInteractable grabInteractable;
-    [SerializeField] private Rigidbody rb;
-    [SerializeField] private GameObject colliderRoot;
 
     [Header("Settings")]
     [SerializeField] private int gunId;
@@ -24,7 +22,6 @@ public class Magazine : MonoBehaviour
     private void Awake()
     {
         grabInteractable = grabInteractable ?? GetComponent<XRGrabInteractable>();
-        rb = rb ?? GetComponent<Rigidbody>();
 
         if (autoInit)
             Init(0, 10);

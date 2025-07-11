@@ -15,9 +15,9 @@ TagManager:
   - Water
   - UI
   - Player
-  - GrabInteractable
+  - GI(Gun)
   - Enemy
-  - 
+  - GI(Magazine)
   - 
   - 
   - 

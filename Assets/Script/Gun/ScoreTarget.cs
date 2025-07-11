@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TargetZone : MonoBehaviour, IDamageable
+public class ScoreTarget : MonoBehaviour, IDamageable
 {
     [Tooltip("이 Zone의 점수")]
     public int scoreValue = 0;

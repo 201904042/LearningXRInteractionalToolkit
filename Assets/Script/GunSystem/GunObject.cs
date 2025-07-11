@@ -42,7 +42,16 @@ public class GunObject : MonoBehaviour
 
         m_mag.UseAmmo();
         m_fire.Fire();
-        PlayFireAnim();
+        m_audio.PlayFireSound();
+        if (m_mag.HasAmmo())
+        {
+            m_animator.SetTrigger("Fire");
+        }
+        else
+        {
+            m_animator.SetBool("SlideBack", true);
+        }
+
 
         StartCoroutine(DelayNextShot());
         UpdateUI();
@@ -53,6 +62,7 @@ public class GunObject : MonoBehaviour
     {
         Debug.Log("ÅºÃ¢ ºÐ¸®µÊ");
         m_mag.Eject();
+        m_audio.PlayInsertMagSound();
         m_state = GunState.NoMag;
         UpdateUI();
     }
@@ -63,8 +73,14 @@ public class GunObject : MonoBehaviour
         Debug.Log("ÅºÃ¢ ÀåÂøµÊ");
         Magazine inserted = args.interactableObject.transform.GetComponent<Magazine>();
         m_mag.Insert(inserted);
+        m_audio.PlayEjectMagSound();
         m_state = GunState.NoSlide;
         UpdateUI();
+    }
+
+    public void GrabSlide()
+    {
+        m_animator.SetBool("SlideBack", true);
     }
 
     public void Reload()
@@ -84,6 +100,9 @@ public class GunObject : MonoBehaviour
                 m_state = GunState.NoAmmo;
             }
         }
+
+        m_animator.SetBool("SlideBack", false);
+        m_audio.PlaySlideSound();
         UpdateUI();
     }
 
@@ -93,7 +112,7 @@ public class GunObject : MonoBehaviour
         m_ui.UpdateUI(m_state, count);
     }
 
-    private void PlayFireAnim() => m_animator.SetTrigger("Fire");
+    
 
     private IEnumerator DelayNextShot()
     {
@@ -102,6 +121,4 @@ public class GunObject : MonoBehaviour
         m_state = m_mag.HasAmmo() ? GunState.Ready : GunState.NoAmmo;
         UpdateUI();
     }
-
-   
 }
