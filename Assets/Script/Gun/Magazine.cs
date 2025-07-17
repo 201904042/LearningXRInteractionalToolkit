@@ -33,6 +33,11 @@ public class Magazine : MonoBehaviour
         bullets = initialBullets;
     }
 
+    public void OnGrab(bool tf)
+    {
+        isOnGrab = tf;
+    }
+
     public void UseBullet()
     {
         if (bullets > 0)

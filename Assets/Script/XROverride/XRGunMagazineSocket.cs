@@ -22,7 +22,6 @@ public class XRGunMagazineSocket : XRSocketInteractor
 
         if (magazine == null || gunGrab == null)
             return null;
-
         bool isValid = m_gun.FireSystem.gunData.GetId() == magazine.GunId;
 
         return isValid ? magazine : null;

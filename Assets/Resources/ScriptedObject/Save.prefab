@@ -773,11 +773,11 @@ MonoBehaviour:
   fireSource: {fileID: 0}
   MagSource: {fileID: 0}
   slideSource: {fileID: 0}
-  fireClip: {fileID: 0}
+  fireClip: {fileID: 8300000, guid: 2203773368e4340d98c114f55c2dd7fd, type: 3}
   emptyClip: {fileID: 0}
-  insertMagClip: {fileID: 0}
-  ejectMagClip: {fileID: 0}
-  slideClip: {fileID: 0}
+  insertMagClip: {fileID: 8300000, guid: eb5685b26a6494994af389a3293064e8, type: 3}
+  ejectMagClip: {fileID: 8300000, guid: e0c70bed5c1a4443083a81de5648c7d5, type: 3}
+  slideClip: {fileID: 8300000, guid: 9158afb6966d445db9caf1dccf7acbcc, type: 3}
 --- !u!1 &2506790346631822527
 GameObject:
   m_ObjectHideFlags: 0
@@ -1141,7 +1141,7 @@ MonoBehaviour:
   maxDistance: 50
   hitLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 257
   normalColor: {r: 0, g: 1, b: 0, a: 0.50980395}
   hitColor: {r: 1, g: 0, b: 0, a: 0.48235294}
 --- !u!1 &3279000029665150126
@@ -1732,6 +1732,9 @@ MonoBehaviour:
   firePos: {fileID: 4480874213790260570}
   gunData: {fileID: 11400000, guid: 2eeaac3a5f5064d4c9013f14c5598300, type: 2}
   decalPrefab: {fileID: 6935314795045471936, guid: f64c92a1ea636a24f88e7aa13251f903, type: 3}
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 257
 --- !u!1 &7799737900067024736
 GameObject:
   m_ObjectHideFlags: 0
